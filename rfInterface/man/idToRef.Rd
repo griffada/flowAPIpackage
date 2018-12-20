@@ -2,22 +2,24 @@
 % Please edit documentation in R/idConverter.R
 \name{idToRef}
 \alias{idToRef}
-\title{Obtain reference for river flow API page.}
+\title{Obtain station reference for river flow API.}
 \usage{
 idToRef(id)
 }
 \arguments{
-\item{id}{EA station number.}
+\item{id}{EA/SEPA/COSMOS station id.}
 }
 \value{
-string to find flow from API
+ref string to request flow from API
 }
 \description{
-For EA stations for which daily flow is provided, this provides the reference
-string for the API, given the EA identifier.
+For EA/SEPA/COSMOS stations for which data is provided, this provides the
+reference string for the API, given the
+ identifier.
 }
 \examples{
 \dontrun{
 idToRef("SS50F007")
 }
+
 }

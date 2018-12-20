@@ -13,10 +13,11 @@ stationList(org = c("EA", "NRFA", "SEPA"))
 dataframe containing station names, ids and other important information.
 }
 \description{
-Returns a dataframe of NRFA-associated stations from EA or SEPA, or both.
-Columns include NRFA station number, latitude, longitude, id,  JSON reference,
-and corresponding identifiers under other organisations.
+Returns a dataframe of stations from a selected organisation.
+Columns include NRFA station number, latitude, longitude, id, JSON
+reference, and corresponding identifiers under other organisations.
 }
 \examples{
 stationList("NRFA")
+
 }

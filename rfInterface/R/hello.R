@@ -7,11 +7,17 @@
 #   Test Package:              'Ctrl + Shift + T'
 
 # site_fetch <- jsonlite::fromJSON(
-#   txt="https://sleepy-lake-10857.herokuapp.com/stations", simplifyDataFrame=T)
+#   txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations",
+# simplifyDataFrame=T)
 
 # lookup_fetch <- jsonlite::fromJSON(
 #   txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
 #   simplifyDataFrame=T)
+
+gdf_fetch <- jsonlite::fromJSON(
+     txt=paste0("https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations/",
+                "EA/gdf/723a8fc4-908b-4430-91c7-9990be86540a/1900-01-01/1901-01-01"),
+     simplifyDataFrame=T)
 
 # /stations
 # [[1]] organisation = c("NRFA", "EA", "SEPA", "COSMOS")
