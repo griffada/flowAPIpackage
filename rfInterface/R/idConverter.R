@@ -54,7 +54,9 @@ idConverter <- function(num, source=c("NRFA", "EA", "SEPA")){
 #' @return dataframe containing station names, ids and other important information.
 #'
 #' @examples
+#' \dontrun{
 #' stationList("NRFA")
+#' }
 #'
 #' @export stationList
 stationList <- function(org = c("EA", "NRFA", "SEPA")){

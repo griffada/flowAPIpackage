@@ -77,6 +77,8 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
     ts <- lapply(ts, function(y){y['data',drop=F]})
   }
 
+  print(paste("li = ", li))
+
   if(li == 1){
     ts <- ts[[1]]
   }
@@ -164,7 +166,7 @@ ts_reformat <- function(ts){
 ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
 # fetches relevant time series and metadata information from API
 
-  if(org != "NRFA"){
+  if(org == "EA"){
     refs <- idToRef(ids)
   }else{
     refs <- ids
