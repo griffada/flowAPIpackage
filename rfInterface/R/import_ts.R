@@ -69,6 +69,8 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
   #   ts <- list(ts)
   # }
 
+  #ts <- lapply(ts, function(y){y$data <- y$data[,c('datetime','value')]})
+
   if(datetime){
     ts <- lapply(ts, function(y){y$data <- ts_reformat(y$data);y})
   }
@@ -77,7 +79,7 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
     ts <- lapply(ts, function(y){y['data',drop=F]})
   }
 
-  print(paste("li = ", li))
+  #print(paste("li = ", li))
 
   if(li == 1){
     ts <- ts[[1]]

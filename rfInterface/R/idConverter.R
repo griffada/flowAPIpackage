@@ -9,15 +9,17 @@
 #' assumes that any given station is uniquely monitored by EA or SEPA, not both.
 #'
 #' @param num vector of numbers or strings containing identifier(s) of station
-#' (all should come from same source)
+#'     (all should come from same source)
 #' @param source string indicating source of provided identifier(s), not target.
 #'
 #' @return the identifier(s) from the other data source not selected in 'source'.
-#' If not found, returns NA.
+#'     If not found, returns NA.
 #'
 #' @examples
+#' \dontrun{
 #' idConverter(39071, "NRFA")  # NRFA to EA/SEPA
 #' idConverter("0130TH", "EA")  # EA to NRFA
+#' }
 #'
 #' @export idConverter
 idConverter <- function(num, source=c("NRFA", "EA", "SEPA")){
@@ -27,9 +29,9 @@ idConverter <- function(num, source=c("NRFA", "EA", "SEPA")){
   inCol <- switch(source,
                   NRFA = "NRFA_STATION",
                   EA =,
-                  SEPA = "id")
+                  SEPA = "STATION_REFERENCE")
   outCol <- switch(source,
-                   NRFA = "id",
+                   NRFA = "STATION_REFERENCE",
                    EA =,
                    SEPA = "NRFA_STATION")
 
