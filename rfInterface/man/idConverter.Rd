@@ -14,7 +14,7 @@ idConverter(num, source = c("NRFA", "EA", "SEPA"))
 }
 \value{
 the identifier(s) from the other data source not selected in 'source'.
-If not found, returns NA.
+    If not found, returns NA.
 }
 \description{
 Given a station identifier, and its source (either NRFA or EA/SEPA), this function
@@ -22,7 +22,9 @@ provides the identifier designated by the other organisation. idConverter
 assumes that any given station is uniquely monitored by EA or SEPA, not both.
 }
 \examples{
+\dontrun{
 idConverter(39071, "NRFA")  # NRFA to EA/SEPA
 idConverter("0130TH", "EA")  # EA to NRFA
+}
 
 }

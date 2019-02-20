@@ -1,8 +1,8 @@
 Package: rfInterface
 Type: Package
 Title: Functions for Using UK Riverflow and Rainfall API
-Date: 2018-12-17
-Version: 0.1.0
+Date: 2019-02-20
+Version: 0.1.1
 Author: Adam Griffin <adagri@ceh.ac.uk>
 Maintainer: Adam Griffin <adagri@ceh.ac.uk>
 Description: rfInterface provides functions to easily access EA and NRFA river
@@ -12,5 +12,5 @@ Description: rfInterface provides functions to easily access EA and NRFA river
 Encoding: UTF-8
 LazyData: true
 License: GPL-3
-Imports: jsonlite, lubridate, graphics, grDevices
+Imports: jsonlite, lubridate, graphics, grDevices, pastecs
 RoxygenNote: 6.1.1

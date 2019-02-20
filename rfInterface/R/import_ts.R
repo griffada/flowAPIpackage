@@ -31,18 +31,18 @@
 #' }
 #'
 #' @export import_ts
-import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
+import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
                       startDate = NULL, endDate = NULL, metadata=FALSE,
                       datetime = TRUE){
 
   ids <- as.character(ids)  #ids for respective dataset, not refs
   org <- match.arg(org)
-  if(!is.null(startDate)){
+  if (!is.null(startDate)) {
     startDate <- lubridate::as_datetime(x=startDate,
                   format=lubridate::guess_formats(startDate, c("dmy", "ymd")),
                   tz="UTC")[1]
   }
-  if(!is.null(endDate)){
+  if (!is.null(endDate)) {
    endDate <- lubridate::as_datetime(x=endDate,
                 format=lubridate::guess_formats(endDate, c("dmy", "ymd")),
                 tz="UTC")[1]
@@ -51,11 +51,11 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
 
   li <- length(ids)
 
-  if(li == 0){ stop("Enter valid id for station(s).") }
+  if (li == 0) { stop("Enter valid id for station(s).") }
 
   stationListId <- stationList(org)$id
 
-  if(all(!(ids %in% stationListId))){
+  if (all(!(ids %in% stationListId))) {
     # check data available for any stations
     stop("No supplied stations available in selected list.")
   }
@@ -71,17 +71,17 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
 
   #ts <- lapply(ts, function(y){y$data <- y$data[,c('datetime','value')]})
 
-  if(datetime){
+  if (datetime) {
     ts <- lapply(ts, function(y){y$data <- ts_reformat(y$data);y})
   }
 
-  if(!metadata){
+  if (!metadata) {
     ts <- lapply(ts, function(y){y['data',drop=F]})
   }
 
   #print(paste("li = ", li))
 
-  if(li == 1){
+  if (li == 1) {
     ts <- ts[[1]]
   }
   # }
@@ -107,9 +107,9 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA"),
 #' @export ts_reformat
 ts_reformat <- function(ts){
 
-  if(all(is.na(ts))){return(ts)}
+  if (all(is.na(ts))) return(ts)
 
-  if(is.data.frame(ts)){
+  if (is.data.frame(ts)) {
 
     ts$datetime <- lubridate::as_datetime(ts$datetime,
                                           format="%Y-%m-%dT%H:%M:%OSZ",
@@ -128,6 +128,60 @@ ts_reformat <- function(ts){
 }
 
 
+#' Import metadata from river flow API.
+#'
+#' Using the river flow/rainfall API, station information can be extracted for
+#' single or multiple sites. All data must be of the same type from the same
+#' organisation.
+#'
+#' @param ids identifier for stations (not EA refs)
+#' @param dat string indicating datatype, as written in metadata.
+#' @param org organisation from whom the data is obtained.
+#'
+#' @return a list containing:
+#' \itemize{
+#' \item id - measuring authority station identifier
+#' \item ref - API reference string
+#' \item name - station name
+#' \item organisation
+#' \item station aliases under different organisations
+#' \item datatype - list of descriptors of data
+#' \item startDate - character string of first record
+#' \item dataUrl - string of URL to obtain data from API directly.
+#' }
+#'      If not found, returns NA for each such station.
+#'
+#' @examples
+#' \dontrun{
+#' import_metadata(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf")
+#' import_metadata(ids="SX67F051", org="EA", dat="gdf")
+#' }
+#'
+#' @export import_metadata
+import_metadata <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS")){
+
+  ids <- as.character(ids)  #ids for respective dataset, not refs
+  org <- match.arg(org)
+  li <- length(ids)
+
+  if (li == 0) { stop("Enter valid id for station(s).") }
+
+  stationListId <- stationList(org)$id
+
+  if (all(!(ids %in% stationListId))) {
+    # check data available for any stations
+    stop("No supplied stations available in selected list.")
+  }
+
+  ts <- ts_fetch_internal(ids, org, dat, startDate=NULL, endDate=NULL)
+  names(ts) <- ids
+  ts <- lapply(ts, function(y){y['detail',drop=F]})
+
+  if (li == 1) ts <- ts[[1]]
+
+  return(ts)
+
+}
 
 
 
@@ -168,7 +222,7 @@ ts_reformat <- function(ts){
 ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
 # fetches relevant time series and metadata information from API
 
-  if(org == "EA"){
+  if (org == "EA") {
     refs <- idToRef(ids)
   }else{
     refs <- ids
@@ -177,10 +231,10 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
   # generate url to relevant API page
   txt <- paste0("https://gateway-staging.ceh.ac.uk/hydrology-ukscape/",
                 "stations/",org,"/",dat,"/",refs)
-  if(!is.null(startDate)){
+  if (!is.null(startDate)) {
     txt <- paste0(txt,"/",format(startDate, "%Y-%m%-%d"))
     # if one date provided only gives that date
-    if(!is.null(endDate)){
+    if (!is.null(endDate)) {
       txt <- paste0(txt,"/",format(endDate, "%Y-%m%-%d"))
     }
   }
@@ -194,7 +248,7 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
               silent=T)) != "try-error"
   })
 
-  if(sum(!accesstest)>0){
+  if (sum(!accesstest)>0) {
     message(paste0("Not possible to access ", dat, " data for stations ",
                    paste(ids[!accesstest], sep=", "), "."))
   }
@@ -211,7 +265,7 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
   datatest <- sapply(ts_fetch,
                      function(y){is.list(y) && is.data.frame(y$data)})
 
-  if(sum(!datatest & accesstest) > 0){
+  if (sum(!datatest & accesstest) > 0) {
     message(paste0("No ", dat, " data for stations ",
                    paste(ids[!datatest & accesstest], sep=", "),
                    ". Check period selected."))
@@ -223,7 +277,7 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
                       which(!accesstest | !datatest),
                       list(list("detail"=NA, "data"=NA)))
 
-  #if(length(ts_fetch) == 1){ts_fetch <- ts_fetch[[1]]}
+  #if (length(ts_fetch) == 1) ts_fetch <- ts_fetch[[1]]
 
   return(ts_fetch)
 }

@@ -61,7 +61,7 @@ idConverter <- function(num, source=c("NRFA", "EA", "SEPA")){
 #' }
 #'
 #' @export stationList
-stationList <- function(org = c("EA", "NRFA", "SEPA")){
+stationList <- function(org = c("EA", "NRFA", "SEPA", "COSMOS")){
 
   org <- match.arg(org)
   listno <- switch(org,

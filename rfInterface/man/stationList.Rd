@@ -4,7 +4,7 @@
 \alias{stationList}
 \title{Gives a list of stations from the relevant organisation.}
 \usage{
-stationList(org = c("EA", "NRFA", "SEPA"))
+stationList(org = c("EA", "NRFA", "SEPA", "COSMOS"))
 }
 \arguments{
 \item{org}{organisation to obtain list of stations from.}
@@ -18,6 +18,8 @@ Columns include NRFA station number, latitude, longitude, id, JSON
 reference, and corresponding identifiers under other organisations.
 }
 \examples{
+\dontrun{
 stationList("NRFA")
+}
 
 }

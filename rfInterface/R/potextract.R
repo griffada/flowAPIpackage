@@ -5,116 +5,111 @@
 #' Extract Peak-over-Threshold series from timeseries (NRFA criteria)
 #'
 #' Using a given time series, a POT series is returned using the NRFA criteria:
-#' * Peaks must be seperated by a time interval at least 3 times as long as the
+#' \itemize{
+#' \item Peaks must be seperated by a time interval at least 3 times as long as the
 #' estimated time to rise at the location of interest.
-#' * Between peaks, the trough must be no more than two-thirds the size of
+#' \item Between peaks, the trough must be no more than two-thirds the size of
 #' either peak.
-#' * All peaks must exceed a given threshold: current standard is to choose a
+#' \item All peaks must exceed a given threshold: current standard is to choose a
 #' threshold which is expected to permit, on average, five events per year.
-#' selecting single dates, periods of record, or entire records for single or
-#' multiple sites. Metadata can also be returned for stations in the dataset.
-#' All data must be of the same type from the same organisation over the
-#' same period.
+#' }
+#' This is based on the work of Ilaria Prosdocimi and the packages \code{pastecs}
+#' and \code{ilaProsUtils}.
 #'
-#' @param series Either a vector of flow magnitudes, or a dataframe with two    #'     columns, magnitude and datetime.
-#' @param datetime If series is not a dataframe, this is a vector of datetimes  #'       corresponding to the events in \code{series} vector.
-#' @param threshold positive number describing minimum size of peak event.
-#' @param timeToRise positive number describing time of rise at the location of
-#'     the measurements.
+#' @param series Either a vector of flow magnitudes, or a dataframe with two    #'       columns, magnitude and datetime.
+#' @param datetime If series is not a dataframe, this is a vector of datetimes  #'       corresponding to the events in \code{series} vector. If not supplied,
+#'       and no datetime supplied, ordinal values are assumed (1,2,...,N).
+#' @param threshold positive number describing minimum size of peak event. If
+#'       not supplied, takes the 90th percentile of the data.
+#' @param timeOfRise positive number describing time of rise at the location of
+#'       the measurements.
 #'
 #' @return a list containing:
-#'     * a dataframe of the peak events, including datetime and magnitude
-#'     * a boolean vector the length of the original series indicating which
+#'     \itemize{
+#'     \item a dataframe of the peak events, including datetime and magnitude
+#'     \item a boolean vector the length of the original series indicating which
 #'         measurements are peaks.
+#'     }
 #'
 #' @examples
 #' \dontrun{
-#'     POTextract(rnorm(100)+20, datetime=as.Date(1:100, origin="2000-01-01"),
-#'                threshold = 20, timeOfRise = 3)
+#'     xt <- (arima.sim(list(order=c(3,0,0), ar=c(0.5,0.25,0.125)), n=100) + 2)^2
+#'     dt <- as.Date(1:100, origin="2000-01-01")
+#'     POTextract(xt, dt, threshold = 20, timeOfRise = 3)
 #' }
 #'
 #' @export import_ts
 
 POTextract <- function(series, datetime=NULL, threshold=0, timeOfRise=0){
 
-  if (is.data.frame(series)) {
-    datetime <- series$datetime
-    series <- series$value
-  }else if (is.null(datetime)) {
-    datetime <- 1:length(series)
-  }else{
-    datetime <- as.Date(datetime)
+  thrConst <- 2/3
+
+  if (!is.data.frame(series)) {
+    if (is.null(datetime)){
+      datetime_real <- 1:length(series)
+    }
+    datetime_real <- datetime
+    series <- data.frame(datetime=1:length(series), series=series)
+  } else {
+    datetime_real <- sort(series[, 1])
+    series$datetime <- order(series[, 1])
   }
 
+  mintimeDiff <- 3*timeOfRise
 
-  L <- length(series)
+  #setup
+  tt <- series
+  names(tt) <- c("time", "obs")
+  tt <- tt[order(tt$time), ]
 
-  if (length(datetime) != L) {
-    stop("datetime series should match length of value series.")
-  }
-  datetime <- as.Date(datetime)
+  NR <- nrow(tt)
 
-  is_peak <- (series[2:(L-1)] > series[1:(L-2)]) &
-             (series[2:(L-1)] > series[3:L]) &
-             (series[2:(L-1)] > threshold)
-  is_peak <- c((series[1] > series[2]) & (series[1] > threshold),
-               is_peak,
-               (series[L] > series[L-1]) & series[L] > threshold)
-  # include endpoints
-  NP <- sum(is_peak)
+  #find all the peaks and troughs
+  cc <- pastecs::turnpoints(tt$obs)  # cc$pos is timepoints without tied values
+  NP <- length(cc$pos)
+  sub <- data.frame(time = tt$time[cc$pos],
+                    flow = tt$obs[cc$pos],
+                    peak = cc$peaks,  # peak = 1, nonpeak = 0
+                    pit = cc$pits)  # pits = troughs
+  sub$peak[sub$flow < threshold] <- 0  # remove peaks below threshold
+  keep <-     rep(0, NP)
+  ObsEA <-    (1:NR)[-cc$pos]
+  obsPeaks <- which(sub$peak == 1)
+  obsPits <-  which(sub$pit  == 1)
+  keep[obsPeaks[1]] <- 1  # keep first peak to start with
 
-
-  peaks<- which(is_peak)
-  # peaktimes <- datetime[is_peak]  # times of peaks
-  # peakmags <- series[is_peak]  # sizes of peaks
-
-
-  pot <- data.frame(list(datetime = datetime[peaks],
-                         value    = series[peaks],
-                         pos = peaks))
-
-
-  if (NP < 1) {
-    message("Series is constant. No peaks.")
-    return(data.frame(list(datetime=c(), value=c())))
-
-  }else{
-    start <- 1
-    if (!is_peak[1]) {
-      peaks <- c(series[1], peaks)  # dummy peak
-      start <- start + 1
+  #peak validation
+  for (i in 2:length(obsPeaks)) {
+    now <- obsPeaks[i]
+    prev <- max(intersect(obsPeaks[1:(i-1)], which(keep==1)))
+    # which still remaining obsPeak occured most recently
+    keep[now] <- 1
+    tp <- sub$time[prev]
+    fp <- sub$flow[prev]
+    tn <- sub$time[now]
+    fn <- sub$flow[now]
+    if (fn == fp) {
+      smallest <- prev
+    }else{
+      smallest <- ifelse(sub$flow[prev] < sub$flow[now], prev, now)
     }
-    if (!is_peak[L]) {
-      peaks <- c(peaks, series[L])  # dummy peak
-      start <- start + 1
-    }
-
-    peaks_order <- peaks[order(peaks)] #potential peaks from smallest to biggest
-
-
-    for (p in start:NP) { # don't include dummy peaks
-      #print(pot$pos)
-      npo <- order(pot$pos)[p]  # chronological order of p'th largest peak
-
-      # time spacing
-      dt_pre <- pot$datetime[npo] - pot$datetime[npo-1]
-      dt_post <- pot$datetime[npo+1] - pot$datetime[npo]
-
-      if(min(dt_pre, dt_post) < 3*timeOfRise){
-        pot <- pot[-npo, ]
-        is_peak[pot$pos[npo]] <- F
-        next
-      }
-
-      #inter-peak drop
-      min_pre <- min(series[pot$pos[npo - 1]:pot$pos[npo]])
-      min_post <- min(series[pot$pos[npo]:pot$pos[npo + 1]])
-      if(min_pre > (2/3) * pot$value[npo] | min_post > (2/3) * pot$value[npo]){
-        pot <- pot[-npo, ]
-        is_peak[pot$pos[npo]] <- F
-        next
+    if ((tn - tp) < mintimeDiff) {
+      keep[smallest] <- 0
+    }else{
+      minThrough <- min(sub$flow[(prev+1):(now-1)])
+      if (minThrough > (min(fp, fn) * thrConst)) {
+        keep[smallest] <- 0
       }
     }
   }
-  return(list(df=pot, is_peak=is_peak))
+
+  # formatting for output
+  isPeak <- rep(0, NR)
+  isPeak[cc$pos] <- keep
+  isPeak[ObsEA] <- 0
+
+  pot <- tt[isPeak == 1, ]
+  pot[, 1] <- datetime_real[isPeak == 1]
+
+  return(list(is_peak=isPeak, pot=pot))
 }
