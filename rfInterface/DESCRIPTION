@@ -1,0 +1,16 @@
+Package: rfInterface
+Type: Package
+Title: Functions for Using UK Riverflow and Rainfall API
+Date: 2019-02-20
+Version: 0.1.1
+Author: Adam Griffin <adagri@ceh.ac.uk>
+Maintainer: Adam Griffin <adagri@ceh.ac.uk>
+Description: rfInterface provides functions to easily access EA and NRFA river
+    flow data and SEPA rainfall data, with utility functions to convert station
+    identifiers and location grid references. Preview of data at 
+    https://gateway-staging.ceh.ac.uk/hydrology-ukscape.
+Encoding: UTF-8
+LazyData: true
+License: GPL-3
+Imports: jsonlite, lubridate, graphics, grDevices, pastecs
+RoxygenNote: 7.1.0
