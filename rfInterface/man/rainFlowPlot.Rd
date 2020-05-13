@@ -4,9 +4,17 @@
 \alias{rainFlowPlot}
 \title{Plot rainfall and flow time series on the same plot.}
 \usage{
-rainFlowPlot(rainID = NULL, flowID = NULL, rainOrg = NULL,
-  flowOrg = NULL, rainDat = "cdr", flowDat = "gdf",
-  startDate = NULL, endDate = NULL, filepath = NULL)
+rainFlowPlot(
+  rainID = NULL,
+  flowID = NULL,
+  rainOrg = NULL,
+  flowOrg = NULL,
+  rainDat = "cdr",
+  flowDat = "gdf",
+  startDate = NULL,
+  endDate = NULL,
+  filepath = NULL
+)
 }
 \arguments{
 \item{rainID}{identifier for station recording rainfall}

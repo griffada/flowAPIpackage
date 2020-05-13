@@ -4,9 +4,15 @@
 \alias{import_ts}
 \title{Import time series from river flow API.}
 \usage{
-import_ts(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
-  startDate = NULL, endDate = NULL, metadata = FALSE,
-  datetime = TRUE)
+import_ts(
+  ids,
+  dat,
+  org = c("NRFA", "EA", "SEPA", "COSMOS"),
+  startDate = NULL,
+  endDate = NULL,
+  metadata = FALSE,
+  datetime = TRUE
+)
 }
 \arguments{
 \item{ids}{identifier for stations (not EA refs)}

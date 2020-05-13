@@ -108,15 +108,23 @@ idToRef <- function(id){
 #### INTERNAL FUNCTIONS ####
 
 lookup_fetch_internal <- function(){
-# internal function to call the lookup table from API
-  jsonlite::fromJSON(
-    txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
-    simplifyDataFrame=T)
+  # internal function to call the lookup table from API
+  if(exists(lookup_fetch)){
+    return(lookup_fetch)
+  }else{
+    jsonlite::fromJSON(
+      txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
+      simplifyDataFrame=T)
+  }
 }
 
 station_fetch_internal <- function(){
 # internal function to call station list tabel from API
-  jsonlite::fromJSON(
-    txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations",
-    simplifyDataFrame=T)
+  if(exists(station_fetch)){
+    return(station_fetch)
+  }else{
+    jsonlite::fromJSON(
+      txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations",
+      simplifyDataFrame=T)
+  }
 }

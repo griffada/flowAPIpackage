@@ -13,4 +13,5 @@ Encoding: UTF-8
 LazyData: true
 License: GPL-3
 Imports: jsonlite, lubridate, graphics, grDevices, pastecs
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
+

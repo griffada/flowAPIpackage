@@ -9,7 +9,6 @@
 # site_fetch <- jsonlite::fromJSON(
 #   txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations",
 # simplifyDataFrame=T)
-
 # lookup_fetch <- jsonlite::fromJSON(
 #   txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
 #   simplifyDataFrame=T)
