@@ -14,3 +14,4 @@ LazyData: true
 License: GPL-3
 Imports: jsonlite, lubridate, graphics, grDevices, pastecs
 RoxygenNote: 7.1.0
+
