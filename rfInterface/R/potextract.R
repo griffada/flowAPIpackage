@@ -16,8 +16,10 @@
 #' This is based on the work of Ilaria Prosdocimi and the packages \code{pastecs}
 #' and \code{ilaProsUtils}.
 #'
-#' @param series Either a vector of flow magnitudes, or a dataframe with two    #'       columns, magnitude and datetime.
-#' @param datetime If series is not a dataframe, this is a vector of datetimes  #'       corresponding to the events in \code{series} vector. If not supplied,
+#' @param series Either a vector of flow magnitudes, or a dataframe with two
+#'       columns, magnitude and datetime.
+#' @param datetime If series is not a dataframe, this is a vector of datetimes
+#'       corresponding to the events in \code{series} vector. If not supplied,
 #'       and no datetime supplied, ordinal values are assumed (1,2,...,N).
 #' @param threshold positive number describing minimum size of peak event. If
 #'       not supplied, takes the 90th percentile of the data.
@@ -35,12 +37,11 @@
 #' \dontrun{
 #'     xt <- (arima.sim(list(order=c(3,0,0), ar=c(0.5,0.25,0.125)), n=100) + 2)^2
 #'     dt <- as.Date(1:100, origin="2000-01-01")
-#'     POTextract(xt, dt, threshold = 20, timeOfRise = 3)
+#'     extractPOT(xt, dt, threshold = 20, timeOfRise = 3)
 #' }
 #'
-#' @export import_ts
-
-POTextract <- function(series, datetime=NULL, threshold=0, timeOfRise=0){
+#' @export
+extractPOT <- function(series, datetime=NULL, threshold=0, timeOfRise=0){
 
   thrConst <- 2/3
 

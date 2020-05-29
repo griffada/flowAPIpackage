@@ -4,16 +4,16 @@
 \alias{idConverter}
 \title{Convert between different station identifiers.}
 \usage{
-idConverter(num, source = c("NRFA", "EA", "SEPA"))
+idConverter(id, org = c("NRFA", "EA", "SEPA"))
 }
 \arguments{
-\item{num}{vector of numbers or strings containing identifier(s) of station
-(all should come from same source)}
+\item{id}{vector of numbers or strings containing identifier(s) of station
+(all should come from same org)}
 
-\item{source}{string indicating source of provided identifier(s), not target.}
+\item{org}{string indicating source of provided identifier(s), not target.}
 }
 \value{
-the identifier(s) from the other data source not selected in 'source'.
+the identifier(s) from the other data providers not selected in 'org'.
     If not found, returns NA.
 }
 \description{

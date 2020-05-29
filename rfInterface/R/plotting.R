@@ -31,8 +31,7 @@
 #'              startDate = "2017-07-01", endDate = "2018-07-01")
 #' }
 #'
-#' @export rainFlowPlot
-
+#' @export
 rainFlowPlot <- function(rainID = NULL, flowID = NULL,
                            rainOrg = NULL, flowOrg = NULL,
                            rainDat = 'cdr', flowDat = 'gdf',
@@ -50,7 +49,7 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
     if(is.null(rainOrg) | is.null(rainDat)){
       stop("Organisation and Data type required for rain station.")
     }else{
-      rain_series <- import_ts(rainID, dat=rainDat, org=rainOrg,
+      rain_series <- importTimeSeries(rainID, dat=rainDat, org=rainOrg,
                                startDate = startDate, endDate = endDate,
                                datetime=T)$data
     }
@@ -60,7 +59,7 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
     if(is.null(flowOrg) | is.null(flowDat)){
       stop("Organisation and Data type required for rain station.")
     }else{
-      flow_series <- import_ts(flowID, dat=flowDat, org=flowOrg,
+      flow_series <- importTimeSeries(flowID, dat=flowDat, org=flowOrg,
                                startDate = startDate, endDate = endDate,
                                datetime=T)$data
     }
@@ -141,7 +140,7 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
 #'     autoAxis(series = ts, cex.axis=0.6, las=1)
 #' }
 #'
-#' @export autoAxis
+#' @export
 
 # autoAxis systematically determines an appropriate scale for a date axis.
 # series is a single datetime series object

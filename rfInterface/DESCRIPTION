@@ -12,6 +12,6 @@ Description: rfInterface provides functions to easily access EA and NRFA river
 Encoding: UTF-8
 LazyData: true
 License: GPL-3
-Imports: jsonlite, lubridate, graphics, grDevices, pastecs
+Imports: jsonlite, lubridate, grDevices, pastecs, zoo, zyp, lmomco, reshape2, RColorBrewer, ggplot2, viridis, readr
 RoxygenNote: 7.1.0
 

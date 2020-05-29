@@ -15,7 +15,7 @@
 #' @param endDate string of the form \code{YYYY-MM-DD} to indicate end of
 #'      period desired. If no startDate provided, this is ignored.
 #' @param metadata if \code{TRUE}, returns metadata for each station selected.
-#' @param datetime if \code{TRUE}, converts datetime column into POSIXlt.
+#' @param datetime if \code{TRUE}, converts text datetime column into POSIXlt.
 #'
 #' @return a dataframe containing the dates and magnitudes of the selected
 #'     data. If multiple stations selected, the dataframes are contained in a
@@ -30,8 +30,8 @@
 #' import_ts(ids="SX67F051", org="EA", dat="gdf", metadata=T)
 #' }
 #'
-#' @export import_ts
-import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
+#' @export
+importTimeSeries <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
                       startDate = NULL, endDate = NULL, metadata=FALSE,
                       datetime = TRUE){
 
@@ -61,30 +61,13 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
   }
 
   ts <- ts_fetch_internal(ids, org, dat, startDate, endDate)
-  # if(!(names(ts)[1] %in% c("detail", "data"))){
   names(ts) <- ids
-  # }
 
-  # if(li == 1){
-  #   ts <- list(ts)
-  # }
+  if (datetime) { ts <- lapply(ts, function(y){y$data <- reformatTimeSeries(y$data);y}) }
 
-  #ts <- lapply(ts, function(y){y$data <- y$data[,c('datetime','value')]})
+  if (!metadata) { ts <- lapply(ts, function(y){y['data',drop=F]}) }
 
-  if (datetime) {
-    ts <- lapply(ts, function(y){y$data <- ts_reformat(y$data);y})
-  }
-
-  if (!metadata) {
-    ts <- lapply(ts, function(y){y['data',drop=F]})
-  }
-
-  #print(paste("li = ", li))
-
-  if (li == 1) {
-    ts <- ts[[1]]
-  }
-  # }
+  if (li == 1) { ts <- ts[[1]] }
 
   return(ts)
 }
@@ -104,8 +87,8 @@ import_ts <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
 #' @return data.frame with replaced datetime column containing equivalent
 #'     POSIXlt objects.
 #'
-#' @export ts_reformat
-ts_reformat <- function(ts){
+#' @export
+reformatTimeSeries <- function(ts){
 
   if (all(is.na(ts))) return(ts)
 
@@ -138,7 +121,7 @@ ts_reformat <- function(ts){
 #' @param dat string indicating datatype, as written in metadata.
 #' @param org organisation from whom the data is obtained.
 #'
-#' @return a list containing:
+#' @return a list, or list of lists, containing:
 #' \itemize{
 #' \item id - measuring authority station identifier
 #' \item ref - API reference string
@@ -157,8 +140,8 @@ ts_reformat <- function(ts){
 #' import_metadata(ids="SX67F051", org="EA", dat="gdf")
 #' }
 #'
-#' @export import_metadata
-import_metadata <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS")){
+#' @export
+importMetadata <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS")){
 
   ids <- as.character(ids)  #ids for respective dataset, not refs
   org <- match.arg(org)
@@ -232,10 +215,10 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
   txt <- paste0("https://gateway-staging.ceh.ac.uk/hydrology-ukscape/",
                 "stations/",org,"/",dat,"/",refs)
   if (!is.null(startDate)) {
-    txt <- paste0(txt,"/",format(startDate, "%Y-%m%-%d"))
+    txt <- paste0(txt,"/",format(startDate, "%Y-%m-%d"))
     # if one date provided only gives that date
     if (!is.null(endDate)) {
-      txt <- paste0(txt,"/",format(endDate, "%Y-%m%-%d"))
+      txt <- paste0(txt,"/", format(endDate, "%Y-%m-%d"))
     }
   }
 

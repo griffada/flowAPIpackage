@@ -8,11 +8,11 @@
 #' provides the identifier designated by the other organisation. idConverter
 #' assumes that any given station is uniquely monitored by EA or SEPA, not both.
 #'
-#' @param num vector of numbers or strings containing identifier(s) of station
-#'     (all should come from same source)
-#' @param source string indicating source of provided identifier(s), not target.
+#' @param id vector of numbers or strings containing identifier(s) of station
+#'     (all should come from same org)
+#' @param org string indicating source of provided identifier(s), not target.
 #'
-#' @return the identifier(s) from the other data source not selected in 'source'.
+#' @return the identifier(s) from the other data providers not selected in 'org'.
 #'     If not found, returns NA.
 #'
 #' @examples
@@ -22,22 +22,22 @@
 #' }
 #'
 #' @export idConverter
-idConverter <- function(num, source=c("NRFA", "EA", "SEPA")){
+idConverter <- function(id, org=c("NRFA", "EA", "SEPA")){
 
-  num <- as.character(num)
-  source <- match.arg(source)
-  inCol <- switch(source,
+  id <- as.character(id)
+  org <- match.arg(org)
+  inCol <- switch(org,
                   NRFA = "NRFA_STATION",
                   EA =,
                   SEPA = "STATION_REFERENCE")
-  outCol <- switch(source,
+  outCol <- switch(org,
                    NRFA = "STATION_REFERENCE",
                    EA =,
                    SEPA = "NRFA_STATION")
 
   lookup_fetch <- lookup_fetch_internal()
 
-  target <- match(num, lookup_fetch[,inCol])  # repeated which function
+  target <- match(id, lookup_fetch[,inCol])  # repeated which function
   return(lookup_fetch[target,outCol])
 }
 
@@ -96,8 +96,7 @@ stationList <- function(org = c("EA", "NRFA", "SEPA", "COSMOS")){
 #' @export idToRef
 idToRef <- function(id){
   id <- as.character(id)
-  station_fetch <- station_fetch_internal()
-  station_fetch <- station_fetch$data[[2]]
+  station_fetch <- station_fetch_internal()$data[[2]]
   if(all(!(id %in% station_fetch$id))){
     stop("no Station IDs found.")
   }else{
@@ -109,22 +108,22 @@ idToRef <- function(id){
 
 lookup_fetch_internal <- function(){
   # internal function to call the lookup table from API
-  if(exists(lookup_fetch)){
-    return(lookup_fetch)
-  }else{
+  # if(exists(lookup_fetch)){
+  #   return(lookup_fetch)
+  # }else{
     jsonlite::fromJSON(
       txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
       simplifyDataFrame=T)
-  }
+  #}
 }
 
 station_fetch_internal <- function(){
 # internal function to call station list tabel from API
-  if(exists(station_fetch)){
-    return(station_fetch)
-  }else{
+  # if(exists(station_fetch)){
+  #   return(station_fetch)
+  # }else{
     jsonlite::fromJSON(
       txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations",
       simplifyDataFrame=T)
-  }
+  #}
 }

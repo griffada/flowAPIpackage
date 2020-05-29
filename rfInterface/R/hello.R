@@ -13,7 +13,7 @@
 #   txt="https://gateway-staging.ceh.ac.uk/hydrology-ukscape/lookup",
 #   simplifyDataFrame=T)
 
-gdf_fetch <- jsonlite::fromJSON(
+fetchGDF <- jsonlite::fromJSON(
      txt=paste0("https://gateway-staging.ceh.ac.uk/hydrology-ukscape/stations/",
                 "EA/gdf/723a8fc4-908b-4430-91c7-9990be86540a/1900-01-01/1901-01-01"),
      simplifyDataFrame=T)
