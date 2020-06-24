@@ -17,8 +17,8 @@
 #'
 #' @examples
 #' \dontrun{
-#' idConverter(39071, "NRFA")  # NRFA to EA/SEPA
-#' idConverter("0130TH", "EA")  # EA to NRFA
+#' idConverter(39072, "NRFA")  # NRFA to EA/SEPA
+#' idConverter("2700TH", "EA")  # EA to NRFA
 #' }
 #'
 #' @export idConverter
@@ -27,22 +27,19 @@ idConverter <- function(id, org=c("NRFA", "EA", "SEPA")){
   id <- as.character(id)
   org <- match.arg(org)
   inCol <- switch(org,
-                  NRFA = "NRFA_STATION",
+                  NRFA = "nrfa_station",
                   EA =,
-                  SEPA = "STATION_REFERENCE")
+                  SEPA = "station_reference")
   outCol <- switch(org,
-                   NRFA = "STATION_REFERENCE",
+                   NRFA = "station_reference",
                    EA =,
-                   SEPA = "NRFA_STATION")
+                   SEPA = "nrfa_station")
 
   lookup_fetch <- lookup_fetch_internal()
 
   target <- match(id, lookup_fetch[,inCol])  # repeated which function
   return(lookup_fetch[target,outCol])
 }
-
-
-
 
 
 #' Gives a list of stations from the relevant organisation.

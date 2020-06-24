@@ -25,9 +25,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' import_ts(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf",
+#' importTimeSeries(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf",
 #'     startDate="2017-01-01", endDate="2017-02-01")
-#' import_ts(ids="SX67F051", org="EA", dat="gdf", metadata=T)
+#' importTimeSeries(ids="SX67F051", org="EA", dat="gdf", metadata=T)
 #' }
 #'
 #' @export
@@ -38,12 +38,12 @@ importTimeSeries <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
   ids <- as.character(ids)  #ids for respective dataset, not refs
   org <- match.arg(org)
   if (!is.null(startDate)) {
-    startDate <- lubridate::as_datetime(x=startDate,
+    startDate <- lubridate::as_date(x=startDate,
                   format=lubridate::guess_formats(startDate, c("dmy", "ymd")),
                   tz="UTC")[1]
   }
   if (!is.null(endDate)) {
-   endDate <- lubridate::as_datetime(x=endDate,
+   endDate <- lubridate::as_date(x=endDate,
                 format=lubridate::guess_formats(endDate, c("dmy", "ymd")),
                 tz="UTC")[1]
   }
@@ -63,7 +63,9 @@ importTimeSeries <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
   ts <- ts_fetch_internal(ids, org, dat, startDate, endDate)
   names(ts) <- ids
 
-  if (datetime) { ts <- lapply(ts, function(y){y$data <- reformatTimeSeries(y$data);y}) }
+  if (datetime) {
+    ts <- lapply(
+      ts, function(y){y$data <- reformatTimeSeries(y$data);y}) }
 
   if (!metadata) { ts <- lapply(ts, function(y){y['data',drop=F]}) }
 
@@ -81,18 +83,27 @@ importTimeSeries <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS"),
 #' objects.
 #'
 #' @param ts time series data.frame object of two columns: datetime
-#' (string of datetimes in form \code{YYYY-MM-DDTHH:MM:SSZ}) and
-#' data (numeric).
-
+#'     (strings in form \code{YYYY-MM-DDTHH:MM:SSZ} or \code{YYYY-MM-DD})
+#'      and data (numeric).
+#'
 #' @return data.frame with replaced datetime column containing equivalent
 #'     POSIXlt objects.
 #'
 #' @export
 reformatTimeSeries <- function(ts){
-
+  cnChange <- FALSE
   if (all(is.na(ts))) return(ts)
 
   if (is.data.frame(ts)) {
+
+    if(dim(ts)[2]==2){
+      cn <- colnames(ts)[1]
+      cnChange <- TRUE
+      colnames(ts)[1] <- "datetime"}
+
+    if (nchar(ts$datetime[1]) == 10) {
+      ts$datetime <- paste0(ts$datetime,"T00:00:01Z")
+    }
 
     ts$datetime <- lubridate::as_datetime(ts$datetime,
                                           format="%Y-%m-%dT%H:%M:%OSZ",
@@ -107,8 +118,14 @@ reformatTimeSeries <- function(ts){
       l
     })
   }
+
+  if (cnChange) colnames(ts)[1] <- cn
   return(ts)
 }
+
+
+
+
 
 
 #' Import metadata from river flow API.
@@ -136,8 +153,8 @@ reformatTimeSeries <- function(ts){
 #'
 #' @examples
 #' \dontrun{
-#' import_metadata(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf")
-#' import_metadata(ids="SX67F051", org="EA", dat="gdf")
+#' importMetadata(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf")
+#' importMetadata(ids="SX67F051", org="EA", dat="gdf")
 #' }
 #'
 #' @export
@@ -185,9 +202,9 @@ importMetadata <- function(ids, dat, org = c("NRFA", "EA", "SEPA", "COSMOS")){
 # @param ids identifier for stations (not EA refs)
 # @param dat string indicating datatype, as written in metadata.
 # @param org organisation from whom the data is obtained.
-# @param startDate POSIXlt object to indicate start of period desired, or
+# @param startDate string to indicate start of period desired, or
 #  single date. Whole record given if no startDate provided.
-# @param endDate POSIXlt object to indicate end of period desired. If no
+# @param endDate string to indicate end of period desired. If no
 #  startDate provided, this is ignored.
 #
 # @return a dataframe containing the dates and magnitudes of the selected
@@ -214,14 +231,20 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
   # generate url to relevant API page
   txt <- paste0("https://gateway-staging.ceh.ac.uk/hydrology-ukscape/",
                 "stations/",org,"/",dat,"/",refs)
+
   if (!is.null(startDate)) {
+    startDate <- lubridate::as_date(startDate,
+                 format=lubridate::guess_formats(startDate, c("ymd", "dmy"))[1],
+                 tz="UTC")
     txt <- paste0(txt,"/",format(startDate, "%Y-%m-%d"))
     # if one date provided only gives that date
     if (!is.null(endDate)) {
+      endDate <- lubridate::as_date(endDate,
+                  format=lubridate::guess_formats(endDate, c("ymd", "dmy"))[1],
+                  tz="UTC")
       txt <- paste0(txt,"/", format(endDate, "%Y-%m-%d"))
     }
   }
-
 
   txt <- as.list(txt)
 
@@ -231,7 +254,7 @@ ts_fetch_internal <- function(ids, org, dat, startDate=NULL, endDate=NULL){
               silent=T)) != "try-error"
   })
 
-  if (sum(!accesstest)>0) {
+  if (sum(!accesstest) > 0) {
     message(paste0("Not possible to access ", dat, " data for stations ",
                    paste(ids[!accesstest], sep=", "), "."))
   }

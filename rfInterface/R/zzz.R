@@ -3,4 +3,4 @@
 }
 
 
-utils::globalVariables(c("Start", "End", "Discrete", "Significance"))
+utils::globalVariables(c("Start", "End", "Discrete", "Significance", "year"))

@@ -1,5 +1,7 @@
 # debug(import_ts)
 # debug(ts_reformat)
+
+# idC <- idConverter()
 # ts1 <- import_ts(ids=c("SX67F051", "SS50F007"), org="EA", dat="gdf",
 #                         startDate="2017-01-01", endDate="2017-02-01")
 # ts2 <- import_ts(ids="SX67F051", org="EA", dat="gdf")

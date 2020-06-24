@@ -23,8 +23,8 @@ assumes that any given station is uniquely monitored by EA or SEPA, not both.
 }
 \examples{
 \dontrun{
-idConverter(39071, "NRFA")  # NRFA to EA/SEPA
-idConverter("0130TH", "EA")  # EA to NRFA
+idConverter(39072, "NRFA")  # NRFA to EA/SEPA
+idConverter("2700TH", "EA")  # EA to NRFA
 }
 
 }

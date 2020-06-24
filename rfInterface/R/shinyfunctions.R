@@ -1,10 +1,10 @@
 #' Return Mann-Kendall test statistics
 #'
-#' Given a time-series vector, return the test statistic for the adjusted
+#' Given a vector of observations, return the test statistic for the adjusted
 #' Mann-Kendall test as in the \code{Kendall} package. This allows for repeated
 #' values.
 #'
-#' @param x time-series vector of observations.
+#' @param x vector of observations.
 #'
 #' @return Z, the test statistic for Mann-Kendall
 #'
@@ -18,10 +18,15 @@ KendallZScore <- function(x) {
     ties <- tx[tx>1]
     varS <- varS - sum(ties*(ties-1)*(2*ties+5))/18
   }
-  #Calculate the Zs statistic
+    #Calculate the Zs statistic
   Zs <- ifelse(abs(S) < 1e-10, 0, (S - sign(S))/sqrt(varS))
-  Zs  # MkZs
+  Zs
 }
+
+
+
+
+
 
 
 #' Modified autocorrelation function
@@ -29,7 +34,7 @@ KendallZScore <- function(x) {
 #' Computes the lag-1 autocorrelation of a time-series, and returns its value and
 #' whether it is significant to a given level.
 #'
-#' @param x a univariate time-series object
+#' @param x a vector of observations
 #' @param sig.level value in [0,1] describing level of significance
 #'
 #' @return a vector containing the lag-1 autocorrelation, and a boolean indicating
@@ -37,20 +42,28 @@ KendallZScore <- function(x) {
 #'
 #' @export
 ACFmod <- function (x, sig.level = 0.95) {
-  # Extract lag1 acf value
-  acf_table <- stats::acf(x, plot=FALSE, na.action=stats::na.pass) # no plot and allow missing values
-  lag1 <- acf_table[[1]][2]  # double brackets to access values in a list
-  # Add significance routine
-  # 95% significance level calculated as +- 1.96/sqrt(n), where n = length of x
+
+  acf_table <- stats::acf(x, plot=FALSE, na.action=stats::na.pass)
+    # no plot and allow missing values
+  lag1 <- acf_table[[1]][2]
+    # Add significance routine
+    # 95% significance level calculated as +- 1.96/sqrt(n), where n = length of x
   sig.level <- stats::qnorm(1 - 0.5*(1-sig.level))
   sig <- 0 # initiate sig
-  if (lag1 > (sig.level / sqrt(sum(!is.na(x))))) { # sum(!is.na(x)) instead of length (x) - see notes.
+  if (lag1 > (sig.level / sqrt(sum(!is.na(x))))) {
+    # sum(!is.na(x)) instead of length (x) - see notes.
     sig <- 1  # Significant positive lag1
   } else if (lag1 < -1 * (sig.level / sqrt(sum(!is.na(x))))) {
     sig <- 0 # Significant negative lag1 (note change above)
   }
   return(c(lag1, sig))
 }
+
+
+
+
+
+
 
 
 #' Detrended time-series using Theil Sen estimates of trend.
@@ -88,6 +101,11 @@ detrend <- function (x,y) {
 }
 
 
+
+
+
+
+
 #' Relative Theil Sen Estimator
 #'
 #' Computes the relative Theil-Sen Estimator of a time-series which is given by \eqn{\xi N / \mu}
@@ -109,6 +127,12 @@ relativeTheilSen <- function(x, y) {
 }
 
 
+
+
+
+
+
+
 #' Modified autocorrelation function on detrended data
 #'
 #' Detrends a time-series using Theil-Sen and computes the lag-1 autocorrelation,
@@ -118,8 +142,8 @@ relativeTheilSen <- function(x, y) {
 #' @param y numeric vector of observations
 #' @param sig.level level of significance to test at.
 #'
-#' @return a vector of 2 values describing lag-1 autocorrelation of the detrended series,
-#' and whether the autocorrelation is significant.
+#' @return a vector of 2 values describing lag-1 autocorrelation of the
+#' detrended series, and whether the autocorrelation is significant.
 #'
 #' @export
 ACFdetrended <- function (x, y, sig.level = 0.95) {
@@ -128,6 +152,10 @@ ACFdetrended <- function (x, y, sig.level = 0.95) {
   ACF.lag1 <- ACFmod(dtr.sen[ ,2], sig.level=sig.level) # actual lag1 correlation
   return(ACF.lag1)
 }
+
+
+
+
 
 #' FEH Generalised Logistic Distribution
 #'
@@ -164,11 +192,17 @@ qglo <- function (p, loc, scale, sh, lower.tail = TRUE) {
 }
 
 
+
+
+
+
+
 #' Compute hydrological year and day-of-year
 #'
 #' Return the hydrological year and day-of-year. The UK hydrological year starts
-#' at 9am on 1st October. For example, the 1901-1902 hydrological year is denoted 1902.
-#' The hydrological day that starts at 9am, 4th October is denoted DOY = 4.
+#' at 9am on 1st October. For example, the 1901-1902 hydrological year is
+#' denoted 1902. The hydrological day that starts at 9am, 4th October is
+#' denoted DOY = 4.
 #' @param datetime vector of datetime objects
 #' @return A dataframe of two columns, DOY and hydrological year.
 #'
@@ -201,6 +235,9 @@ findHydrolYr <- function (datetime) {
   return(data.frame(DOY=nday, yr=y))
 }
 
+
+
+
 #' Maximum likelihood estimation of non-stationary distributions using TSE
 #'
 #' fits the GLO parameters as described in FEH Vol III,
@@ -218,6 +255,9 @@ parglo_mle_tse <- function (amax, years, init_params) {
   tse <- zyp::zyp.sen(amax~years)$coefficients[2]
 
   NY <- length(years)
+
+  years0 <- years
+  years <- years0 - floor(stats::median(years))
 
   llhd <- function(par){
     xi    <- par[1] + years*tse
@@ -247,6 +287,10 @@ parglo_mle_tse <- function (amax, years, init_params) {
 }
 
 
+
+
+
+
 #' Percentiles of daily flow over specified periods
 #'
 #' This computes percentiles of flow given daily flow records,
@@ -260,17 +304,6 @@ parglo_mle_tse <- function (amax, years, init_params) {
 #'
 #' @export
 periodPercentile <- function (daily, pc=c(0.5, 0.95), period="year") {
-  #####
-  # periodPercentile computes percentiles of flow given daily flow records,
-  # values computed over each period as selected. Returned as time-series.
-  #
-  # daily     daily flow series (2 column: date, flow)
-  # pc        vector of percentiles of exceedence
-  # period    string ("month", "year", "decade") indicating period
-  #
-  # OUT
-  # df        data.frame (period, flow_1, flow_2, ...) of percentiles
-  #####
 
   exc <- c("MIN", "Q05%", "Q50%", "Q95%", "MAX")
 
@@ -312,17 +345,25 @@ periodPercentile <- function (daily, pc=c(0.5, 0.95), period="year") {
   dailysumm
 }
 
-#' import data from API
+
+
+
+
+
+#' import data from API for triangle plotting
 #'
-#' this
+#' This takes AMAX data from the NRFA API, and reformats it into shape for a
+#' multi-temporal analysis of trend. The analysis needs at least 26 years of data as
+#' it uses a 25-year rolling window.
 #'
-#' @param st_no station NRFA identifier
+#'
+#' @param st_no string or numerical station NRFA identifier
 #' @param start start year
 #' @param end end year
 #'
 #' @export
 importTriangle <- function(st_no, start, end){
-  ### REPLACE WITH GET STATION FUNCTION
+  ### TODO: REPLACE WITH GET STATION FUNCTION
   api_call_path <- paste0("https://nrfaapps.ceh.ac.uk/nrfa/ws/time-series?",
                          "format=nrfa-csv&data-type=amax-flow&station=",
                          st_no)
@@ -330,7 +371,6 @@ importTriangle <- function(st_no, start, end){
   # Extract AMAX
   tr_raw <- utils::read.csv(api_call_path, skip=21, col.names=c("Date","Flow"),
                      stringsAsFactors=FALSE)
-  #print(am_raw)
 
   # if fewer than 2 rows of daily data (unlikely), treat station as missing.
   if(nrow(tr_raw) < 2){
@@ -345,12 +385,11 @@ importTriangle <- function(st_no, start, end){
 
   }else{
    # Include Hydrological Year
-   #print(findHydrolYr(as.Date(tr_raw$Date)))
    df <- data.frame(date= as.Date(tr_raw$Date),
                        year =findHydrolYr(tr_raw$Date)[,2],
                        flow = as.numeric(tr_raw$Flow))
 
-   df <- subset(df, date >= start & date <= end)
+   df <- subset(df, df$year >= start & df$year <= end)
    # year0 is shifted to make TSE more interpretable
    df$year0 <- df$year - floor(stats::median(df$year))
    if(length(unique(df$year))!=length(df$year)){
@@ -390,7 +429,7 @@ importTriangle <- function(st_no, start, end){
 triangleTrend <- function(ts, startyr, endyr){
 
   colnames(ts) <- c("year", "flow")
-  ts$year0 <- ts$year - stats::median(ts$year)
+  ts$year0 <- ts$year - floor(stats::median(ts$year))
   dataSub <- zoo::na.trim(ts)
   # create empty array
   ND <- nrow(dataSub)
@@ -399,7 +438,8 @@ triangleTrend <- function(ts, startyr, endyr){
   dimnames(Mat) <-  list(End=dataSub$year, Start=dataSub$year)
   dimnames(Mat_TSArel) <- list(End=dataSub$year, Start=dataSub$year)
 
-  All_combs <- expand.grid(End=rownames(Mat), Start=colnames(Mat))
+  All_combs <- expand.grid(End=dataSub$year, Start=dataSub$year,
+                           stringsAsFactors=FALSE)
   # loop through stations
   Used_Subsets <- vector('list', length = nrow(Mat)^2)
   # Get true data
@@ -408,11 +448,11 @@ triangleTrend <- function(ts, startyr, endyr){
   firstNonNA <- min(NonNAindex)
 
   # relaxed criterion for start year, consistent with script 5
-  firstNonNA <- ifelse(firstNonNA<=2,1,firstNonNA-2)
+  firstNonNA <- ifelse(firstNonNA <= 2, 1, firstNonNA-2)
   lastNonNA <- max(NonNAindex)
 
   # relaxed criterion for end year, consistent with script 5
-  if (lastNonNA<nrow(dataSub)){ lastNonNA <- lastNonNA + 1}
+  if (lastNonNA < nrow(dataSub)) { lastNonNA <- lastNonNA + 1}
 
   for (yr_start in 1:dim(Mat)[2]){ # loop yr_start through starting years starts
     if (yr_start<firstNonNA){
@@ -422,25 +462,37 @@ triangleTrend <- function(ts, startyr, endyr){
       Mat[, yr_start] <- Mat_TSArel[, yr_start] <- -100
       Mat[yr_start, ] <- Mat_TSArel[yr_start, ] <- -100
     }else{
-      for (yr_end in yr_start:dim(Mat)[1]){ # loop yr_end through ending years starts
-        #print(paste("yr_end: ", yr_end))
-        if(yr_end - yr_start<(27-1)){ # we need at least 27 years, meaning a difference of at least 26
+      for (yr_end in yr_start:dim(Mat)[1]){
+        # loop yr_end through ending years starts
+        if(yr_end - yr_start<(27-1)){
+          # we need at least 27 years, meaning a difference of at least 26
           Mat[yr_end, yr_start] <- Mat_TSArel[yr_end, yr_start] <- -200
-          #print(paste(yr_start, yr_end, "ping -200"))
         }else{
-          used_data <- true.data[yr_start:yr_end] # subset used data
-          NA_percent <- sum(is.na(used_data))/length(used_data) # 10% missing data criterion
-          NonNAindex_subset <- which(!is.na(used_data)) # 2 years relaxation for start year
-          firstNonNA_subset <- min(NonNAindex_subset) # 2 years relaxation for start year
-          Length_used_data <- length(used_data[!is.na(used_data)]) # 27-year of actual data criterion
-          lastNonNA_subset <- max(NonNAindex_subset) # 1 year relaxation for end year
-          CriterionPass <- NA_percent<= 0.1 & Length_used_data>=27 &
-            firstNonNA_subset<=3 & lastNonNA_subset>= (length(used_data) - 1)
+          used_data <- true.data[yr_start:yr_end]
+          # subset used data
+          NA_percent <- sum(is.na(used_data))/length(used_data)
+          # 10% missing data criterion
+          NonNAindex_subset <- which(!is.na(used_data))
+          # 2 years relaxation for start year
+          firstNonNA_subset <- min(NonNAindex_subset)
+          # 2 years relaxation for start year
+          Length_used_data <- length(used_data[!is.na(used_data)])
+          # 27-year of actual data criterion
+          lastNonNA_subset <- max(NonNAindex_subset)
+          # 1 year relaxation for end year
+          CriterionPass <- (NA_percent<= 0.1 & Length_used_data>=27 &
+            firstNonNA_subset<=3 & lastNonNA_subset >= (length(used_data) - 1))
           # combined criteria
           if(CriterionPass){
-            Mat[yr_end, yr_start] <- relativeTheilSen(dataSub[yr_start:yr_end,3], used_data)
-            # assign the used data to the correct position within the Used_Subsets list
-            i_row <- which(All_combs$End==dataSub[yr_end,3] & All_combs$Start==dataSub[yr_start,3])
+            Mat_TSArel[yr_end, yr_start] <- relativeTheilSen(
+              dataSub[yr_start:yr_end,3], used_data
+            )
+            Mat[yr_end, yr_start] <- KendallZScore(
+              used_data
+            )
+            # assign used data to correct position within Used_Subsets
+            i_row <- (which(All_combs$End==dataSub$year[yr_end] &
+                              All_combs$Start==dataSub$year[yr_start]))
             Used_Subsets[[i_row]] <- used_data
           }else{
             Mat[yr_end, yr_start] <- Mat_TSArel[yr_end, yr_start] <- -300
@@ -449,7 +501,7 @@ triangleTrend <- function(ts, startyr, endyr){
       } # loop yr_end through ending years ends
 
 
-    } # end criterion if the starting year falls out out the range of data of the station
+    } # end criterion if tarting year falls outside range of data of the station
   } # loop yr_start through starting years ends
 
   # read the list with the used data sets and keep only the ones with actual data
@@ -458,17 +510,18 @@ triangleTrend <- function(ts, startyr, endyr){
   Used_combs <- which(unlist(lapply(Used_Subset, is.null))==T)
   Used_Subset[Used_combs] <- NA
   # remove start/end NAs are they are not used on MKZ test
-  #browser()
   Used_Subset <- lapply(Used_Subset, zoo::na.trim)
-  # keep only the location of the instances that have unique time-series (with lenght>0)
+  # keep only the location of instances with unique time-series (w/ length>0)
   Used_Subsets <- which(duplicated(Used_Subset)==F &
                           unlist(lapply(Used_Subset, function(x)length(x)))>0 )
 
-  Mat[is.na(Mat)] <- -400 # all remaining NA's are places where end_year<start_year
+  Mat[is.na(Mat)] <- -400
+  # all remaining NA's are places where end_year < start_year
   Mat_TSArel[is.na(Mat_TSArel)] <- -400
 
   return(list(MKZ=Mat, TSE=Mat_TSArel))
 }
+
 
 #' Triangle plotting of trends for all observed time windows
 #'
@@ -478,9 +531,10 @@ triangleTrend <- function(ts, startyr, endyr){
 #' @param MKZ matrix of Mann-Kendall Z-scores
 #' @param ts time-series dataframe of year and flow
 #'
-#' @return a triangle plot with start year along the side, end year along the bottom.
-#' Each gridsquare shows the Mann-Kendall statistic for that time period. Points which
-#' are statistically significant at 95% are highlighted.
+#' @return triangle plot with start year along the side, end year along the bottom.
+#'
+#' Each gridsquare shows the Mann-Kendall statistic for that time period.
+#' Points which are statistically significant at 95% are highlighted.
 #'
 #' @export
 trianglePlot <- function(MKZ, ts){
@@ -509,7 +563,7 @@ trianglePlot <- function(MKZ, ts){
   ALLPOS <- (length(Neg_Values)==0)
 
   # Define breaks for classes for the values on the CUT function
-  MAX_Q2.5 <- max(Neg_Values[Neg_Values< -1.96])
+  MAX_Q2.5 <- suppressWarnings(max(Neg_Values[Neg_Values< -1.96]))
   if(is.infinite(MAX_Q2.5)){MAX_Q2.5 <- -1.96}
   # The -1.96 is replaced with the maximum value that is still lower -1.96
   # othwrwise if there is value exactly -1.96 it will be counted on the
@@ -659,8 +713,8 @@ trianglePlot <- function(MKZ, ts){
 #' @param rp vector of return periods (in years for AMAX data)
 #' @param NST if true, plots non-stationary return period lines.
 #'
-#' @return a plot with the time-series and lines indicating magnitude of events with
-#' given return periods over time.
+#' @return a plot with the time-series and lines indicating magnitude of
+#' events with given return periods over time.
 #'
 #' @export
 amaxPlot <- function(x, param, start, end, rp=2, NST=FALSE){

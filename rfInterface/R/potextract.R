@@ -50,11 +50,12 @@ extractPOT <- function(series, datetime=NULL, threshold=0, timeOfRise=0){
       datetime_real <- 1:length(series)
     }
     datetime_real <- datetime
-    series <- data.frame(datetime=1:length(series), series=series)
+    series0 <- data.frame(datetime=1:length(series), series=series)
   } else {
-    datetime_real <- sort(series[, 1])
-    series$datetime <- order(series[, 1])
+    datetime_real <- sort(series0[, 1]) # sorted dates
+    series0$datetime <- order(series0[, 1]) #numerical 1:N
   }
+  series <- series0
 
   mintimeDiff <- 3*timeOfRise
 

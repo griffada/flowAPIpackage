@@ -121,6 +121,11 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
   }
 }
 
+
+
+
+
+
 #' Add automatically scaled horizontal date axis.
 #'
 #' Using a provided time series, this functions adds a horizontal datetime axis
@@ -130,7 +135,8 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
 #'
 #' @param series vector of datetime objects (readable by \code{as.Date})
 #' @param ... additional \code{par} arguments to be passed to \code{axis}.
-#'     Can include any argument passed to axis except \code{side}, \code{at}, \code{labels} and \code{tick}.
+#'     Can include any argument passed to axis except \code{side}, \code{at},
+#'     \code{labels} and \code{tick}.
 #'
 #' @return Adds axis to existing plot in current device.
 #'
@@ -142,21 +148,32 @@ rainFlowPlot <- function(rainID = NULL, flowID = NULL,
 #'
 #' @export
 
+
+
+
+
+
+
 # autoAxis systematically determines an appropriate scale for a date axis.
 # series is a single datetime series object
 # ... any other graphical par arguments to the axis function (see '?axis')
 autoAxis <- function(series, ...){
   X <- as.Date(range(series))
   Xseq <- seq(X[1], X[2], by='month')
-  Xlen <- findInterval(length(Xseq), c(0,12,36,60))
+  Xlen <- findInterval(length(Xseq), c(0,12,36,60,300))
   Xseq <- switch(Xlen,
                  seq(X[1], X[2], by='month'),
                  seq(X[1], X[2], by='3 months'),
                  seq(X[1], X[2], by='6 months'),
-                 seq(X[1], X[2], by='year'))
+                 seq(X[1], X[2], by='year'),
+                 seq(X[1], X[2], by='5 years'))
   Xlab <- switch(Xlen,
-                 "%b %Y","%b %Y","%b %Y","%Y")
+                 "%b %Y","%b %Y","%b %Y","%Y", "%Y")
 
   graphics::axis(1, at=Xseq, labels=format(Xseq, Xlab), ...)
-  graphics::axis(1, at=seq(X[1], X[2], by='month'), labels=F, tick=T)
+  if(length(seq(X[1], X[2], by="month")) < 20){
+    graphics::axis(1, at=seq(X[1], X[2], by='month'), labels=F, tick=T)
+  }else{
+    graphics::axis(1, at=seq(X[1], X[2], by='year'), labels=F, tick=T)
+  }
 }

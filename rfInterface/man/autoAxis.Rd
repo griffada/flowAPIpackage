@@ -10,7 +10,8 @@ autoAxis(series, ...)
 \item{series}{vector of datetime objects (readable by \code{as.Date})}
 
 \item{...}{additional \code{par} arguments to be passed to \code{axis}.
-Can include any argument passed to axis except \code{side}, \code{at}, \code{labels} and \code{tick}.}
+Can include any argument passed to axis except \code{side}, \code{at},
+\code{labels} and \code{tick}.}
 }
 \value{
 Adds axis to existing plot in current device.
